@@ -14,7 +14,7 @@ Tracks Jira AISDLC-5. Builds on [0006](../0006-code-agent-evaluation/) (the
 first code-agent evaluation, 20 synthetic bug-fix scenarios) and
 [0026](../0026-eval-statistical-significance/) (how many trials a comparison
 needs). The runnable eval lives in `fullsend-ai/agents` under
-`eval/code-rhai/` (proposed in a pull request from this work; see Related).
+`eval/dev/code-rhai/` (proposed in a pull request from this work; see Related).
 
 ## Hypothesis
 
@@ -194,6 +194,6 @@ from epic-code-gen).
 
 ## Related
 
-- `fullsend-ai/agents`: `eval/code-rhai/` (pipeline, scripts, cards); the
+- `fullsend-ai/agents`: `eval/dev/code-rhai/` (pipeline, scripts, cards); the
   proposing pull request is linked from this experiment's pull request.
 - fullsend-ai/fullsend#7748, a hardening note filed from this work.
