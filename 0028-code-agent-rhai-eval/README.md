@@ -80,41 +80,86 @@ refusal (below) and the first PR-quality scores.
 | 004 | PR, tests pass, quality 3/5 | PR, tests pass, quality 3/5 |
 | 005 | PR, tests fail (lockfile not regenerated), quality 2/5 | did not finish (infrastructure) |
 
-### 2026-09-26: Opus 4.6 (fleet as-is) vs Luna, three cases, one judge
+### 2026-09-26 and 2026-10-06: Opus 4.6 (fleet as-is) vs Luna, five cases, one judge
 
-Cases 001, 003, 004. Judge: GPT-6 Sol on the codex runner, one sample per
-case. Reviewer: the production review agent on Claude Code, Opus 4.6
-orchestrator, sub-agents on their configured tiers.
+Cases 001, 003, 004 on 09-26 and 002, 005 on 10-06, same configuration and
+the same agent checkout throughout. Judge: GPT-6 Sol on the codex runner, one
+sample per case. Reviewer: the production review agent on Claude Code, Opus
+4.6 orchestrator, sub-agents on their configured tiers. "Fleet as-is" means
+the agents repository's harness defaults; the fleet's own deployed
+configuration has since moved to newer models, so this baseline is dated.
 
 | Case | Opus 4.6 | Luna |
 |---|---|---|
-| 001 | PR, 95 turns, tests pass, 12 review findings, quality 3/5 | declined again (same reason), 13 turns, decline 3/5 |
+| 001 | PR, 95 turns, tests pass, 12 review findings, quality 3/5 | declined (same reason as before), 13 turns, decline 3/5 |
+| 002 | PR, 62 turns, tests pass (21 test functions removed, 11 added), 22 findings, quality 3/5 | declined, 9 turns, decline 3/5 |
 | 003 | PR, 54 turns, checks pass, 7 findings, quality 3/5 | PR, 53 turns, checks pass, 6 findings, quality 3/5 |
 | 004 | PR, 76 turns, tests pass, 5 findings, quality 3/5 | PR, 29 turns, tests pass, 6 findings, quality 3/5 |
+| 005 | PR, 248 turns, tests fail (lockfile not regenerated), 16 findings, quality 1/5 | PR, 172 turns, tests pass, 16 findings, quality 3/5 |
 
-Cost, at the providers' published rates: Opus coder $10.40 for three cases;
-Luna coder about $0.15 for three cases; each production review $4 to $6;
-judging about $1 per verdict.
+Totals under this judge: Opus 4.6 five PRs, quality 3, 3, 3, 3, 1 (mean
+2.6), repo tests pass on 4 of 5; Luna three PRs at 3, 3, 3 (mean 3.0) with
+tests passing on all three, plus two declines at 3. Cost at published rates:
+Opus coder $29 for five cases; Luna coder about $0.50; the eight production
+reviews $4 to $11 each ($55 total; the two largest PRs each drew a review
+over $10); judging about $1 per verdict.
+
+### Three judges on the same ten artifacts
+
+The stored artifacts were re-scored without re-running any agent: Opus 5 on
+the first six (via Vertex), then Opus 5.5 on all ten (via the EnMaaS gateway
+on the harness side). One sample each.
+
+| Artifact | GPT-6 Sol | Opus 5 | Opus 5.5 |
+|---|---|---|---|
+| Opus 4.6, 001 PR | 3 | 3 | 3 |
+| Opus 4.6, 002 PR | 3 | - | 3 |
+| Opus 4.6, 003 PR | 3 | 3 | 3 |
+| Opus 4.6, 004 PR | 3 | 3 | 4 |
+| Opus 4.6, 005 PR | 1 | - | 1 |
+| Luna, 001 decline | 3 | 2 | 2 |
+| Luna, 002 decline | 3 | - | 2 |
+| Luna, 003 PR | 3 | 3 | 4 |
+| Luna, 004 PR | 3 | 4 | 4 |
+| Luna, 005 PR | 3 | - | 4 |
+
+Every judge is within one point of every other on every artifact. The
+disagreements all lean the same way: the stronger judge rates Luna's PRs
+higher (mean 4.0 under Opus 5.5 against 2.8 for Opus 4.6) and its declines
+lower (2, for leaving no proposal or plan behind, and in one case for a false
+claim about upstream). Opus 5.5 is now the eval's judge for both arms.
 
 ### Observations
 
-- **A reproducible refusal.** Luna declined RHAI-517 in both runs with the
-  same reason: the repository's `AGENTS.md` and `CONTRIBUTING.md` require an
-  assignee and an agreed approach before non-trivial work, and the issue had
-  neither. Sonnet and Opus implemented the feature. The decline judge called
-  it "defensible, not compelling" because Luna offered no proposal or plan.
-  This is an obedience-versus-initiative difference between models that the
-  outcome classification makes visible instead of hiding as a failure.
-- **Judge scale compression.** Every verdict from GPT-6 Sol on 2026-09-26 was
-  exactly 3/5, six PRs and one decline, with specific and mutually consistent
-  rationales (partial coverage of the acceptance criteria, in scope, tests
-  pass but do not exercise the new work). Opus 5 spread the same kind of work
-  over 2 to 4 the night before. A judge that puts everything on one rung
-  cannot separate arms; re-scoring the stored artifacts with a second judge is
-  the next step.
-- **Luna is cheap.** Roughly 70 times cheaper than Opus 4.6 per case here,
-  with equal judge scores on the two cases both completed. The sample is far
-  too small to conclude anything, but it sets the stake for the question.
+- **Reproducible refusals, on both sides.** Luna declined RHAI-517 in every
+  run (five of five) and RHAI-331 in every run (three of three), each time
+  because the repository's `AGENTS.md` and `CONTRIBUTING.md` require an
+  assignee and an agreed approach before non-trivial work, and for RHAI-331
+  also because the epic leaves the deprecation sunset date to a pending
+  product decision. Sonnet and Opus implemented both. On RHAI-331 Opus chose
+  a sunset date itself, which the judge flagged as "asserted without
+  evidence of the required PM decision". The judges rated Luna's declines
+  2 to 3: facts correct, but no proposal or plan left behind, and the RHAI-331
+  decline included a false claim about which endpoint an upstream PR had
+  added. Obedience versus initiative, visible from both sides because the
+  outcome classification does not hide a decline as a failure.
+- **Judges agree, and the stronger one separates more.** The all-3s of the
+  first Sol run were partly the work and partly the judge: on identical
+  artifacts Opus 5.5 found 4s that Sol did not, always in Luna's favour on
+  PRs and against Luna on declines, while never disagreeing by more than a
+  point. Judge choice changes the gap between arms, not the ranking of
+  individual artifacts.
+- **Luna is cheap, and not worse here.** Roughly 60 times cheaper than Opus
+  4.6 per case, with equal or better judge scores on the three cases both
+  completed. Opus's extra turns did not buy quality on the largest case: 248
+  turns produced a bigger scaffold that does not install, where Luna's 172
+  turns passed the repo's tests. The sample is far too small to conclude
+  anything; it sets the stake for the question.
+- **One repo convention decided every test failure.** Both Claude models,
+  on different days, added a workspace package to the odh-dashboard monorepo
+  without regenerating `package-lock.json`, so `npm ci` refused to install.
+  Luna did not. Repository-specific conventions of this kind are where
+  "agent readiness" of a repo shows up in the numbers.
 - **Reported costs can be wrong.** The pi runtime priced GPT-6 Luna at a
   Claude-tier rate, about 50 times its published price. Costs above were
   recomputed from token counts.
@@ -124,22 +169,28 @@ judging about $1 per verdict.
 
 ## Limitations
 
-One sample per case, one run per arm, three to five cases, one judge with a
-compressed scale. Runs were made from a laptop against a personal cloud
-budget; nothing here is a fleet measurement yet. Two of the five cases are
-from the same repository.
+One sample per case, one run per arm, five cases, one sample per judge.
+Runs were made from a laptop against a personal cloud budget; nothing here
+is a fleet measurement yet. Two of the five cases are from the same
+repository. The baseline is the agents repository's harness default of late
+August 2026, not the fleet's current deployed configuration.
 
 ## Conclusion
 
 Open. The pipeline works end to end on real epics without reference
 solutions, and it already measures something the synthetic benchmark in 0006
 could not: how an agent behaves when the repository's own rules push back.
-Whether the quality signal is sharp enough to rank configurations depends on
-the judge, which is the next thing to test.
+The quality signal is consistent across three judges; what it lacks is
+sample size.
 
-Next: re-score the stored artifacts with a second judge; run the remaining
-two cases in both arms; raise judge samples per 0026; try removing the review
-step as a controlled variable; add cases from other repositories.
+Next: repeated judge samples per 0026 on the stored artifacts; a second case
+set built from 0006's twenty scenarios, which also brings in the safety
+traps; a re-baseline against the agent as currently deployed; a finer
+outcome taxonomy that separates "asked for clarification" from "declined"
+and judges the stated need; an instruction-compliance judge; the
+"implementation, not PR" instruction as a matrix arm; then one treatment at
+a time (a minimal platform-contract-only agent as a floor, and practices
+from epic-code-gen).
 
 ## Related
 
