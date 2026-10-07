@@ -241,7 +241,11 @@ repository. The baseline is the agents repository's harness default of late
 August 2026, not the fleet's current deployed configuration. All judge
 verdicts before the confined re-judge were produced by a judge that could
 reach live GitHub; they are kept for the agreement comparison, but only the
-confined column is treated as a measurement.
+confined column is treated as a measurement. Every verdict so far also saw
+per-case author notes that have since been removed from the eval: on review
+they restated the epic, described the human change, or were wrong in places.
+The judge now gets the task text alone; the stored verdicts have not been
+re-run without the notes.
 
 ## Conclusion
 
